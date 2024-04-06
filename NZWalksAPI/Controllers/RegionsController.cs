@@ -32,7 +32,7 @@ namespace NZWalksAPI.Controllers
         {
             //Get data from database - domain models
             var regionsDomain = await _regionRepository.GetAllAsync();
-          
+
             //var regionsDto = _mapper.Map<List<RegionDto>>(regionsDomain);
             //return DTOs
             return Ok(_mapper.Map<List<RegionDto>>(regionsDomain));
@@ -52,7 +52,7 @@ namespace NZWalksAPI.Controllers
                 return NotFound();
             }
             //convert domain model to dto
-            
+
             return Ok(_mapper.Map<RegionDto>(regionDomain));
         }
 
@@ -61,14 +61,22 @@ namespace NZWalksAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
         {
-            //Map or convert dto to domain model
-            var regionDomainModel = _mapper.Map<Region>(addRegionRequestDto);
-            //Use domain model to create Region
-            regionDomainModel = await _regionRepository.CreateAsync(regionDomainModel);
+            if (ModelState.IsValid)
+            {
+                //Map or convert dto to domain model
+                var regionDomainModel = _mapper.Map<Region>(addRegionRequestDto);
+                //Use domain model to create Region
+                regionDomainModel = await _regionRepository.CreateAsync(regionDomainModel);
 
-            //Map domain model back to DTO
-            var regionDto = _mapper.Map<RegionDto>(regionDomainModel);
-            return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDto);
+                //Map domain model back to DTO
+                var regionDto = _mapper.Map<RegionDto>(regionDomainModel);
+                return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDto);
+            }
+            else
+            {
+                return BadRequest();
+            }
+
         }
 
 
@@ -77,23 +85,25 @@ namespace NZWalksAPI.Controllers
         [HttpPut("{id:Guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
         {
-            //Map dto to domain model
-            var domaimRegion = _mapper.Map<Region>(updateRegionRequestDto);
+            if(ModelState.IsValid)
+            { //Map dto to domain model
+                var domaimRegion = _mapper.Map<Region>(updateRegionRequestDto);
 
-            //check if region exists
-            domaimRegion = await _regionRepository.UpdateAsync(id, domaimRegion);
-            if (domaimRegion == null)
-            {
-                return NotFound();
+                //check if region exists
+                domaimRegion = await _regionRepository.UpdateAsync(id, domaimRegion);
+                if (domaimRegion == null)
+                {
+                    return NotFound();
+                }               
+                //Convert domain model to dto
+                //var regionDto = _mapper.Map<RegionDto>(domaimRegion);
+                return Ok(_mapper.Map<RegionDto>(domaimRegion));
             }
-            //Mapt dto to domain model
-            domaimRegion.Code = updateRegionRequestDto.Code;
-            domaimRegion.Name = updateRegionRequestDto.Name;
-            domaimRegion.RegionImageUrl = updateRegionRequestDto.RegionImageUrl;
-            await _dbContext.SaveChangesAsync();
-            //Convert domain model to dto
-            //var regionDto = _mapper.Map<RegionDto>(domaimRegion);
-            return Ok(_mapper.Map<RegionDto>(domaimRegion));
+            else
+            {
+                return BadRequest();
+            }
+            
         }
 
         //Delete Region
@@ -107,7 +117,7 @@ namespace NZWalksAPI.Controllers
             {
                 return NotFound();
             }
-            
+
 
             //return deleted region back
             //map Domain Model to DTO
