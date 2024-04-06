@@ -24,7 +24,7 @@ namespace NZWalksAPI.Repositories
         public async Task<Walk?> DeleteAsync(Guid id)
         {
             var existingWalk = await _dbContext.Walks.FirstOrDefaultAsync(x => x.Id == id);
-            if(existingWalk == null)
+            if (existingWalk == null)
             {
                 return null;
             }
@@ -33,12 +33,28 @@ namespace NZWalksAPI.Repositories
             return existingWalk;
         }
 
-        public async Task<List<Walk>> GetAllAsync()
+        public async Task<List<Walk>> GetAllAsync(string? filterOn = null, string? filterQuery = null)
         {
-            return await _dbContext.Walks
-                .Include(x => x.Difficulty)
-                .Include(x => x.Region)
-                .ToListAsync();
+            var walks = _dbContext.Walks.Include(x => x.Difficulty).Include(x => x.Region).AsQueryable();
+            //Filtering
+            if (string.IsNullOrWhiteSpace(filterOn) == false && string.IsNullOrWhiteSpace(filterQuery) == false)
+            {
+                if (filterOn.Equals("Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    walks = walks.Where(x => x.Name.Contains(filterQuery));
+                }
+                if(filterOn.Equals("Description", StringComparison.OrdinalIgnoreCase))
+                {
+                    walks = walks.Where(x => x.Description.Contains(filterQuery));
+                }
+                
+            }
+
+            return await walks.ToListAsync();
+            //return await _dbContext.Walks
+            //    .Include(x => x.Difficulty)
+            //    .Include(x => x.Region)
+            //    .ToListAsync();
         }
 
         public async Task<Walk?> GetByIdAsync(Guid id)
