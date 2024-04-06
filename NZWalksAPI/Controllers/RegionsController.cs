@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NZWalksAPI.CustomActionFilters;
 using NZWalksAPI.Data;
 using NZWalksAPI.Models.Domain;
 using NZWalksAPI.Models.DTO;
@@ -59,10 +60,10 @@ namespace NZWalksAPI.Controllers
         //POST To create new region
         //POST:https://localhost:port/api/regions
         [HttpPost]
+        [VaildateModel]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
         {
-            if (ModelState.IsValid)
-            {
+           
                 //Map or convert dto to domain model
                 var regionDomainModel = _mapper.Map<Region>(addRegionRequestDto);
                 //Use domain model to create Region
@@ -70,12 +71,7 @@ namespace NZWalksAPI.Controllers
 
                 //Map domain model back to DTO
                 var regionDto = _mapper.Map<RegionDto>(regionDomainModel);
-                return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDto);
-            }
-            else
-            {
-                return BadRequest();
-            }
+                return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDto);                       
 
         }
 
@@ -83,10 +79,11 @@ namespace NZWalksAPI.Controllers
         //Update region
         //PUT: https://localhost:port/api/regions/{id}
         [HttpPut("{id:Guid}")]
+        [VaildateModel]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
         {
-            if(ModelState.IsValid)
-            { //Map dto to domain model
+            
+             //Map dto to domain model
                 var domaimRegion = _mapper.Map<Region>(updateRegionRequestDto);
 
                 //check if region exists
@@ -97,12 +94,7 @@ namespace NZWalksAPI.Controllers
                 }               
                 //Convert domain model to dto
                 //var regionDto = _mapper.Map<RegionDto>(domaimRegion);
-                return Ok(_mapper.Map<RegionDto>(domaimRegion));
-            }
-            else
-            {
-                return BadRequest();
-            }
+                return Ok(_mapper.Map<RegionDto>(domaimRegion));          
             
         }
 
