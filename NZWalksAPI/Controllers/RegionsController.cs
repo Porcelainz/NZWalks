@@ -8,6 +8,7 @@ using NZWalksAPI.Data;
 using NZWalksAPI.Models.Domain;
 using NZWalksAPI.Models.DTO;
 using NZWalksAPI.Repositories;
+using System.Text.Json;
 
 namespace NZWalksAPI.Controllers
 {
@@ -19,13 +20,15 @@ namespace NZWalksAPI.Controllers
         private readonly NZWalksDbContext _dbContext;
         private readonly IRegionRepository _regionRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<RegionsController> _logger;
 
         //DI     
-        public RegionsController(NZWalksDbContext dbContext, IRegionRepository regionRepository, IMapper mapper)
+        public RegionsController(NZWalksDbContext dbContext, IRegionRepository regionRepository, IMapper mapper, ILogger<RegionsController> logger)
         {
             _dbContext = dbContext;
             _regionRepository = regionRepository;
             _mapper = mapper;
+            _logger = logger;
         }
         //GET ALL REGIONS
         //GET: https://localhost:port/api/regions
@@ -33,11 +36,13 @@ namespace NZWalksAPI.Controllers
         [Authorize(Roles = "Reader, Writer")]
         public async Task<IActionResult> GetAll()
         {
+            _logger.LogInformation("GetAll Action Method was invoked");
             //Get data from database - domain models
             var regionsDomain = await _regionRepository.GetAllAsync();
 
             //var regionsDto = _mapper.Map<List<RegionDto>>(regionsDomain);
             //return DTOs
+            _logger.LogInformation($"Finish GetAllRegions request with data: {JsonSerializer.Serialize(regionsDomain)}");
             return Ok(_mapper.Map<List<RegionDto>>(regionsDomain));
         }
 
