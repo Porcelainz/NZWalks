@@ -7,7 +7,7 @@ namespace NZWalksAPI.Models.DTO
         [Required]
         public IFormFile File { get; set; }
         [Required]
-        public string FineName { get; set; }
+        public string FileName { get; set; }
         public string? FileDescription { get; set; }
     }
 }

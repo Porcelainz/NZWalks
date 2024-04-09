@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NZWalksAPI.Models.Domain;
 using NZWalksAPI.Models.DTO;
+using NZWalksAPI.Repositories;
 
 namespace NZWalksAPI.Controllers
 {
@@ -8,6 +10,13 @@ namespace NZWalksAPI.Controllers
     [ApiController]
     public class ImagesController : ControllerBase
     {
+        private readonly IImageRepository _imageRepository;
+
+        public ImagesController(IImageRepository imageRepository)
+        {
+            _imageRepository = imageRepository;
+        }
+
         //POST: /api/Images/Upload
         [HttpPost]
         [Route("Upload")]
@@ -16,8 +25,18 @@ namespace NZWalksAPI.Controllers
             ValidateFileUpload(imageUploadRequest);
             if(ModelState.IsValid)
             {
+                //convert Dto to Domain model
+                var imageDomainModel = new Image
+                {
+                    File = imageUploadRequest.File,
+                    FileExtension = Path.GetExtension(imageUploadRequest.File.FileName),
+                    FileSizeInBytes = imageUploadRequest.File.Length,
+                    FileName = imageUploadRequest.FileName,
+                    FileDescription = imageUploadRequest.FileDescription,
+                };
                 //User repository to upload image
-
+                await _imageRepository.Upload(imageDomainModel);
+                return Ok(imageDomainModel);
             }
             return BadRequest(ModelState);
         }
