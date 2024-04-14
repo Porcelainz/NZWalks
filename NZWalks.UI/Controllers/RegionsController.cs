@@ -103,5 +103,27 @@ namespace NZWalks.UI.Controllers
             }
             return View();
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(RegionDto request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var httpResponseMessage = await client.DeleteAsync($"https://localhost:7261/api/Regions/{request.Id}");
+
+                httpResponseMessage.EnsureSuccessStatusCode();
+
+                return RedirectToAction("Index", "Regions");
+            }
+            catch (Exception ex)
+            {
+
+                //Console
+            }
+            return View("Edit");
+
+           
+        }
     }
 }
